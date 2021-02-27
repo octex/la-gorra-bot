@@ -4,10 +4,16 @@ from random import randint
 import discord
 from discord.ext import commands
 from dotenv import load_dotenv
+# Menciones de roles
+# <@&519330250535075840> GORDO BONDIOLA
+# <@&507347964444934169> GORDEUS
+# <@&700084198924353576> GORDO MAESTRO
 
+GORDO_BONDIOLA = "<@&519330250535075840>"
+GORDEUS = ""
 IMPUNES = ['GORDO MAESTRO', 'GORDO BONDIOLA', 'GORDEUS']
-PREFIX = '<'
-MODO_VIOLENTO = True
+PREFIX = '*'
+MODO_VIOLENTO = False
 
 # @commands.has_role('admin')
 logging.basicConfig(level=logging.INFO)
@@ -29,7 +35,12 @@ async def on_message(message):
     message_channel_name = str(message.channel)
     message_channel = message.channel
     message_content = message.content
-
+    logging.info("  - MENSAJE DE DS")
+    logging.info("***********************************************************")
+    logging.info(f"      Mensaje:      {message_content}")
+    logging.info(f"      Autor:        {author}")
+    logging.info(f"      Canal:        {message_channel_name}")
+    logging.info("***********************************************************")
     if MODO_VIOLENTO:
         if message.author == bot.user:
             return
@@ -40,10 +51,10 @@ async def on_message(message):
     if author_last_role not in IMPUNES:
         if (message_content.startswith('-p') or message_content.startswith('>')) and \
         message_channel_name != 'musica':
-            await message_channel.send('Que onda chabon, flasheaste! (musica)')
+            await message_channel.send(f'{GORDO_BONDIOLA} Chst! Aca hay un ladri que se esta ganando una bala.')
         elif message_content.startswith('$') and \
             message_channel_name != 'waifus':
-            await message_channel.send('Que onda chabon, flasheaste! (waifus)')
+            await message_channel.send(f'{GORDO_BONDIOLA} Chst! Aca hay un ladri que se esta ganando una bala.')
     if message.content.startswith("<@!" + str(bot.user.id) + ">"):
         await message_channel.send(f"Buenas pingo feo, tira: `{PREFIX}help` o `{PREFIX}info`")
     await bot.process_commands(message)
@@ -59,15 +70,25 @@ async def ping(ctx):
     await ctx.send('Pong :ping_pong:')
 
 
-@bot.command(name='ban')
-@commands.has_role('GORDEUS')
-@commands.has_role('GORDO BONDIOLA')
-async def ban(ctx):
-    await ctx.send('ban test')
+@bot.command(name='reglas')
+async def reglas(ctx):
+    await ctx.send('Memorizalas: #reglas')
+
+# @bot.command(name='ban')
+# @commands.has_role('GORDEUS')
+# @commands.has_role('GORDO BONDIOLA')
+# async def ban(ctx):
+#     await ctx.send('ban test')
+
 
 @bot.event
 async def on_command_error(ctx, error):
     response = 'Flasheaste rey :sunglasses: tira `>help` y anda memorizando. Gil.'
+    logging.info("  - ERROR DE COMANDO")
+    logging.info("***********************************************************")
+    logging.error("         Error procesando comando:")
+    logging.error(f"        {error}")
+    logging.info("***********************************************************")
     await ctx.send(response)
 
 """
