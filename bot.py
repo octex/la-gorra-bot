@@ -26,7 +26,6 @@ logging.basicConfig(level=logging.INFO)
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 bot = commands.Bot(command_prefix=PREFIX)
-# TODO: Agregar schema de la tabla para que SQLAlchemy la reconozca en la base. Forro.
 engine = create_engine('sqlite:///gorra-db.db', echo=True)
 Session = sessionmaker(bind=engine)
 session = Session()
@@ -40,7 +39,8 @@ async def on_ready():
 @bot.event
 async def on_message(message):
     author = message.author
-    author_roles = message.author.roles
+    author_mention = author.mention
+    author_roles = author.roles
     author_last_role = author_roles[-1]
     message_channel_name = str(message.channel)
     message_channel = message.channel
@@ -62,6 +62,12 @@ async def on_message(message):
         if (message_content.startswith('-p') or message_content.startswith('>')) and \
         message_channel_name != 'musica':
             await message_channel.send(f'{GORDO_BONDIOLA} *Chst! Aca hay un ladri que se esta ganando una bala.*')
+            logging.info(f"//////////////////////////////////////////////////////////////////")
+            logging.info(f"{author.mention}")
+            logging.info(f"//////////////////////////////////////////////////////////////////")
+            # TODO: Agregar la logica definida, fucker.
+            import pdb
+            pdb.set_trace()
             minion = Minion(username='Test', full_username='TestFull', mention_in_server='<@!12873912>', strikes=1)
             session.add(minion)
             session.commit()
