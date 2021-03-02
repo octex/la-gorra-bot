@@ -143,6 +143,11 @@ async def alparedon(ctx):
     await ctx.send('Test')
 
 
+@bot.command(name='info')
+async def info(ctx):
+    # TODO: Como eran esos recuadros de mierda que usaba en el otro bot?
+    await ctx.send('')
+
 @bot.event
 async def on_command_error(ctx, error):
     response = f'Flasheaste rey :sunglasses: tira `{PREFIX}help` y anda memorizando. Gil.'
