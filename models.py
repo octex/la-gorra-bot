@@ -1,11 +1,16 @@
+import os
 from sqlalchemy import *
 from sqlalchemy.ext.declarative import declarative_base
+from dotenv import load_dotenv
 from sqlalchemy import Sequence
+
+load_dotenv()
 
 Column(Integer, Sequence('id'), primary_key=True)
 Base = declarative_base()
 Table = Table()
-engine = create_engine('sqlite:///C:\\Users\\okila\\Desktop\\PROYECTOS\\la_gorra_bot\\la-gorra-bot\\gorra-db.db', echo=True)
+DB_PATH = os.getenv('DB_PATH')
+engine = create_engine(DB_PATH, echo=True)
 
 
 class Minion(Base):
