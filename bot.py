@@ -69,12 +69,7 @@ async def on_message(message):
     message_channel_name = str(message.channel)
     message_channel = message.channel
     message_content = message.content
-    logging.info("  - MENSAJE DE DS")
-    logging.info("***********************************************************")
-    logging.info(f"      Mensaje:      {message_content}")
-    logging.info(f"      Autor:        {author}")
-    logging.info(f"      Canal:        {message_channel_name}")
-    logging.info("***********************************************************")
+    logging.info(f"DS MESSAGE - author: {author}    channel: {message_channel_name}     content: {message_content}")
     # if MODO_VIOLENTO:
     #     if message.author == bot.user:
     #         return
@@ -151,10 +146,7 @@ async def info(ctx):
 @bot.event
 async def on_command_error(ctx, error):
     response = f'Flasheaste rey :sunglasses: tira `{PREFIX}help` y anda memorizando. Gil.'
-    logging.error("  - ERROR DE COMANDO")
-    logging.error("***********************************************************")
-    logging.error(f"        {error}")
-    logging.error("***********************************************************")
+    logging.error(f"COMMAND ERROR - error: {error}")
     await ctx.send(response)
 
 
