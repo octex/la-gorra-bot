@@ -3,6 +3,7 @@ from sqlalchemy.exc import IntegrityError
 
 VERSION = '1.0.0'
 
+
 def ascii_logo():
     print("_____________       ______________________________________ ")
     print("___  /___    |      __  ____/_  __ \__  __ \__  __ \__    |")
@@ -11,10 +12,6 @@ def ascii_logo():
     print("/_____/_/  |_|      \____/  \____/ /_/ |_| /_/ |_| /_/  |_|")
     print(f"                                        Version: {VERSION}")
     print("                                         © Gordos inc.")
-
-
-class Constants:
-    LOGGER_BAR = "***********************************************************"
 
 
 def load_config_table(config, engine):

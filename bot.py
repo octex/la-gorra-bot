@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 from models import Minion, BotConfig
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import *
-from utils import ascii_logo, load_config_table
+from utils import ascii_logo, load_config_table, VERSION
 
 
 # Inicializacion
@@ -18,7 +18,7 @@ DB_PATH = os.getenv('DB_PATH')
 SQL_CONFIG_PATH = os.getenv('SQL_CONFIG_PATH')
 engine = create_engine(DB_PATH, echo=True)
 
-config = open(SQL_CONFIG_PATH)
+config = open(SQL_CONFIG_PATH, encoding="utf8")
 load_config_table(config=config, engine=engine)
 
 Session = sessionmaker()
@@ -32,11 +32,15 @@ GORDEUS = session.query(BotConfig).filter_by(keyConfig='admin_role_mention').fir
 GORDO_BONDIOLA = session.query(BotConfig).filter_by(keyConfig='mod_role_mention').first().value
 REGLAS_CHANNEL = session.query(BotConfig).filter_by(keyConfig='rules_channel').first().value
 IMPUNES = ['GORDO MAESTRO', 'GORDO BONDIOLA', 'GORDEUS']
-# MODO_VIOLENTO = False
+BOT_COLOR = discord.Color.dark_purple()
+# global MODO_VIOLENTO
+MODO_VIOLENTO = False
+#TODO: Considerar la opcion de sacar los tweets de la pagina directamente
+TILT_FRASES = session.query(BotConfig).filter_by(keyConfig='tilt_text').first().value.split(';')
 
 
 bot = commands.Bot(command_prefix=PREFIX)
-
+# bot.remove_command('help')
 
 @bot.event
 async def on_ready():
@@ -130,18 +134,48 @@ async def indultar(ctx):
 
 @bot.command(name='enlamira')
 async def enlamira(ctx):
-    await ctx.send('Test')
+    # embed = discord.Embed(title="")
+    minions = session.query(Minion).filter_by(strikes=1).all()
+    await ctx.send(minions)
 
 
 @bot.command(name='alparedon')
 async def alparedon(ctx):
-    await ctx.send('Test')
+    minions = session.query(Minion).filter(Minion.strikes > 1).all()
+    await ctx.send(minions)
+
+
+# @bot.command(name='help')
+# async def help(ctx):
+#     embed = discord.Embed(title="Ayuda", description="Guia de comandos", color=BOT_COLOR)
+#     await ctx.send(embed=embed)
+
+
+@commands.has_any_role('GORDO BONDIOLA', 'GORDEUS')
+@bot.command(name='modoviolento')
+async def modoviolento(ctx):
+    content = ctx.message.content.split(" ")
+    try:
+        value = int(content[1])
+        if value < 0 or value > 1:
+            raise ValueError
+        global MODO_VIOLENTO
+        MODO_VIOLENTO = bool(value)
+        await ctx.send(f"Cambiado **modo violento** a: {MODO_VIOLENTO}")
+    except ValueError:
+        await ctx.send("Mandaste cualquiera forro. Es 0 o 1 la opcion.")
+    except IndexError:
+        await ctx.send(f"El **modo violento** esta: {MODO_VIOLENTO}")
 
 
 @bot.command(name='info')
 async def info(ctx):
-    # TODO: Como eran esos recuadros de mierda que usaba en el otro bot?
-    await ctx.send('')
+    embed = discord.Embed(title="Info", description="Informacion del bot", color=BOT_COLOR)
+    embed.add_field(name='Version', value=VERSION)
+    embed.add_field(name='Repositorio', value="https://github.com/octex/la-gorra-bot")
+    embed.add_field(name='Autor', value="BolsaDeGlucosa")
+    await ctx.send(embed=embed)
+
 
 @bot.event
 async def on_command_error(ctx, error):
