@@ -174,6 +174,8 @@ async def info(ctx):
     embed.add_field(name='Version', value=VERSION)
     embed.add_field(name='Repositorio', value="https://github.com/octex/la-gorra-bot")
     embed.add_field(name='Autor', value="BolsaDeGlucosa")
+    embed.add_field(name='Lenguaje', value="Python")
+    embed.add_field(name='Hincha de', value="Peñarol")
     await ctx.send(embed=embed)
 
 
