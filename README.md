@@ -14,7 +14,7 @@ Es necesario antes crear un archivo en el directorio raiz del proyecto con nombr
 ```
 DISCORD_TOKEN=TU_TOKEN_DE_DISCORD
 DB_PATH=sqlite:///DIR_WIN\\gorra-db.db
-DB_PATH=sqlite:///DIR_LINUX//gorra-db.db
+DB_PATH=sqlite:///./gorra-db.db # Linux
 SQL_CONFIG_PATH=C:\Users\TU_USER\CARPETA_DEL_PROYECTO\la-gorra-bot\resources/config.sql
 SQL_CONFIG_PATH=./resources/config.sql # Linux
 ```
