@@ -147,7 +147,6 @@ async def advertidos(ctx):
 async def paraechar(ctx):
     embed = discord.Embed(title="Para echar", description="Los conchesumare que deben morir", color=COLOR_ROJO)
     minions = session.query(Minion).filter(Minion.strikes > 1).all()
-    minions = session.query(Minion).filter_by(strikes=1).all()
     for minion in minions:
         embed.add_field(name=minion.username, value=minion.strikes, inline=False)
     await ctx.send(embed=embed)
