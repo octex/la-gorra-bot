@@ -33,6 +33,8 @@ GORDO_BONDIOLA = session.query(BotConfig).filter_by(keyConfig='mod_role_mention'
 REGLAS_CHANNEL = session.query(BotConfig).filter_by(keyConfig='rules_channel').first().value
 IMPUNES = ['GORDO MAESTRO', 'GORDO BONDIOLA', 'GORDEUS']
 BOT_COLOR = discord.Color.dark_purple()
+COLOR_AMARILLO = discord.Color.from_rgb(255, 233, 0)
+COLOR_ROJO = discord.Color.red()
 # global MODO_VIOLENTO
 MODO_VIOLENTO = False
 #TODO: Considerar la opcion de sacar los tweets de la pagina directamente
@@ -132,17 +134,23 @@ async def indultar(ctx):
         await ctx.send('Me falta el ladri a indultar')
 
 
-@bot.command(name='enlamira')
-async def enlamira(ctx):
-    # embed = discord.Embed(title="")
+@bot.command(name='advertidos')
+async def advertidos(ctx):
+    embed = discord.Embed(title="Advertidos", description="Los ladris con solo una falta a la ley", color=COLOR_AMARILLO)
     minions = session.query(Minion).filter_by(strikes=1).all()
-    await ctx.send(minions)
+    for minion in minions:
+        embed.add_field(name=minion.username, value=minion.strikes, inline=False)
+    await ctx.send(embed=embed)
 
 
-@bot.command(name='alparedon')
-async def alparedon(ctx):
+@bot.command(name='paraechar')
+async def paraechar(ctx):
+    embed = discord.Embed(title="Para echar", description="Los conchesumare que deben morir", color=COLOR_ROJO)
     minions = session.query(Minion).filter(Minion.strikes > 1).all()
-    await ctx.send(minions)
+    minions = session.query(Minion).filter_by(strikes=1).all()
+    for minion in minions:
+        embed.add_field(name=minion.username, value=minion.strikes, inline=False)
+    await ctx.send(embed=embed)
 
 
 # @bot.command(name='help')
