@@ -1,13 +1,13 @@
 import os
 import logging
-from random import randint
+from random import randint, choice
 import discord
 from discord.ext import commands
 from dotenv import load_dotenv
 from models import Minion, BotConfig
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import *
-from utils import ascii_logo, load_config_table, VERSION
+from utils import ascii_logo, load_config_table, registro_civil, VERSION, WELCOME_MESSAGES
 
 
 # Inicializacion
@@ -31,37 +31,25 @@ PREFIX = session.query(BotConfig).filter_by(keyConfig='prefix').first().value
 GORDEUS = session.query(BotConfig).filter_by(keyConfig='admin_role_mention').first().value
 GORDO_BONDIOLA = session.query(BotConfig).filter_by(keyConfig='mod_role_mention').first().value
 REGLAS_CHANNEL = session.query(BotConfig).filter_by(keyConfig='rules_channel').first().value
+WELCOME_CHANNEL = session.query(BotConfig).filter_by(keyConfig='welcome_channel_id').first().value
 IMPUNES = ['GORDO MAESTRO', 'GORDO BONDIOLA', 'GORDEUS']
 BOT_COLOR = discord.Color.dark_purple()
 COLOR_AMARILLO = discord.Color.from_rgb(255, 233, 0)
 COLOR_ROJO = discord.Color.red()
-# global MODO_VIOLENTO
 MODO_VIOLENTO = False
-#TODO: Considerar la opcion de sacar los tweets de la pagina directamente
 TILT_FRASES = session.query(BotConfig).filter_by(keyConfig='tilt_text').first().value.split(';')
 
+# Creamos la instancia del bot
+intents = discord.Intents.default()
+intents.members = True
+bot = commands.Bot(command_prefix=PREFIX, intents=intents)
 
-bot = commands.Bot(command_prefix=PREFIX)
-# bot.remove_command('help')
 
 @bot.event
 async def on_ready():
     ascii_logo()
     logging.info(f'{bot.user} has connected to Discord!')
 
-
-async def registro_civil(author, author_name, author_mention, message_channel):
-    minion_q = session.query(Minion).filter_by(username=author_name).first()
-    if minion_q:
-        minion_q.strikes = minion_q.strikes + 1
-        session.add(minion_q)
-        session.commit()
-        await message_channel.send(f'{author_mention} Guarda amigo que vas por {minion_q.strikes} strikes')
-    else:
-        minion_n = Minion(username=str(author_name), full_username=str(author), mention_in_server=str(author_mention), strikes=1)
-        session.add(minion_n)
-        session.commit()
-        await message_channel.send(f'{author_mention} Primer strike, tene cuidado...')
 
 @bot.event
 async def on_message(message):
@@ -88,23 +76,24 @@ async def on_message(message):
         message_channel_name != 'musica' or message_content.startswith('-skip') or message_content.startswith('>skip'):
             await message_channel.send(f'{GORDO_BONDIOLA} Chst! Aca hay un ladri que se esta ganando una bala.')
             await registro_civil(author=author, author_name=author_name, author_mention=author_mention,
-                                 message_channel=message_channel)
+                                 message_channel=message_channel, session=session)
         elif message_content.startswith('$w') and \
             message_channel_name != 'waifus':
             await message_channel.send(f'{GORDO_BONDIOLA} Chst! Aca hay un ladri que se esta ganando una bala.')
             await registro_civil(author=author, author_name=author_name, author_mention=author_mention,
-                                 message_channel=message_channel)
+                                 message_channel=message_channel, session=session)
     if message_content.startswith('sale') or message_content.startswith('Sale'):
         await message_channel.send(f"Sale pa :sunglasses:")
-    if message.content.startswith("<@!" + str(bot.user.id) + ">"):
+    if bot.user.mentioned_in(message):
         await message_channel.send(f"Que onda pa, tira: `{PREFIX}help` o `{PREFIX}info`")
     await bot.process_commands(message)
 
 
 @bot.event
 async def on_member_join(member):
-    await member.create_dm()
-    await member.dm_channel.send("test")
+    channel = bot.get_channel(WELCOME_CHANNEL)
+    welcome_message = choice(WELCOME_MESSAGES)
+    await channel.send(f"{member.mention} {welcome_message}")
 
 
 @bot.command(name='ping', help='Para saber si esta vivo el bot')
@@ -150,12 +139,6 @@ async def paraechar(ctx):
     for minion in minions:
         embed.add_field(name=minion.username, value=minion.strikes, inline=False)
     await ctx.send(embed=embed)
-
-
-# @bot.command(name='help')
-# async def help(ctx):
-#     embed = discord.Embed(title="Ayuda", description="Guia de comandos", color=BOT_COLOR)
-#     await ctx.send(embed=embed)
 
 
 @commands.has_any_role('GORDO BONDIOLA', 'GORDEUS')
