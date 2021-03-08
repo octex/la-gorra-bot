@@ -9,7 +9,10 @@ WELCOME_MESSAGES = ["DNI y papeles por favor. Puede pasar, comportese y no haga 
                     "Amigo que olor a culo que tenes, pero esta perfecto loko asi me gusta la gente, sin pudor y sin verguenza. Bienvenido y no te mandes ninguna.",
                     "DAAALE BOOOOOOOO DAAAAALE BOOOOOOOOOO",
                     "Ojo con Jorge que no hay culo que perdone...",
-                    "Al que madruga dios lo achura. Patria, familia y ley. Bienvenido."]
+                    "Al que madruga dios lo achura. Patria, familia y ley. Bienvenido.",
+                    "El problema no es mirar la vidriera, sino cuando te entran ganas de tocar.",
+                    "Entra papi, no muerdo... Al menos no tan fuerte...",
+                    "Disculpame pibe, ahora no te puedo dar la bienvenida. Está jugando peñarol."]
 #TODO: Mudar esta shit a la base
 
 
