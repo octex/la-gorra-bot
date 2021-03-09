@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 from models import Minion, BotConfig
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import *
-from utils import ascii_logo, load_config_table, registro_civil, VERSION, WELCOME_MESSAGES
+from utils import ascii_logo, load_config_table, registro_civil, VERSION, WELCOME_MESSAGES, TILT_FRASES
 
 
 # Inicializacion
@@ -37,7 +37,6 @@ BOT_COLOR = discord.Color.dark_purple()
 COLOR_AMARILLO = discord.Color.from_rgb(255, 233, 0)
 COLOR_ROJO = discord.Color.red()
 MODO_VIOLENTO = False
-TILT_FRASES = session.query(BotConfig).filter_by(keyConfig='tilt_text').first().value.split(';')
 
 # Creamos la instancia del bot
 intents = discord.Intents.default()
@@ -64,12 +63,12 @@ async def on_message(message):
     message_channel = message.channel
     message_content = message.content
     logging.info(f"DS MESSAGE - author: {author}    channel: {message_channel_name}     content: {message_content}")
-    # if MODO_VIOLENTO:
-    #     if message.author == bot.user:
-    #         return
-    #     num = randint(1, 1000)
-    #     if num > 500:
-    #         await message_channel.send(f"{str(author.mention)} DNI y rol o te rompo la traquea")
+    if MODO_VIOLENTO:
+        if message.author == bot.user:
+            return
+        num = randint(1, 1000)
+        if num > 750:
+            await message_channel.send(f"{choice(TILT_FRASES)}")
 
     if author_last_role not in IMPUNES:
         if (message_content.startswith('-p') or message_content.startswith('>p')) and \
@@ -85,7 +84,7 @@ async def on_message(message):
     if message_content.startswith('sale') or message_content.startswith('Sale'):
         await message_channel.send(f"Sale pa :sunglasses:")
     if bot.user.mentioned_in(message):
-        await message_channel.send(f"Que onda pa, tira: `{PREFIX}help` o `{PREFIX}info`")
+        await message_channel.send(f"Que onda pa, tira: `{PREFIX}help`")
     await bot.process_commands(message)
 
 
@@ -101,7 +100,7 @@ async def ping(ctx):
     await ctx.send('Pong :ping_pong:')
 
 
-@bot.command(name='reglas')
+@bot.command(name='reglas', help='Por si no encontras el canal')
 async def reglas(ctx):
     await ctx.send(f'Memorizalas: {REGLAS_CHANNEL}')
 
@@ -123,7 +122,7 @@ async def indultar(ctx):
         await ctx.send('Me falta el ladri a indultar')
 
 
-@bot.command(name='advertidos')
+@bot.command(name='advertidos', help='los que estan para kickear')
 async def advertidos(ctx):
     embed = discord.Embed(title="Advertidos", description="Los ladris con solo una falta a la ley", color=COLOR_AMARILLO)
     minions = session.query(Minion).filter_by(strikes=1).all()
@@ -132,7 +131,7 @@ async def advertidos(ctx):
     await ctx.send(embed=embed)
 
 
-@bot.command(name='paraechar')
+@bot.command(name='paraechar', help='directo al ban estos hijos de puta')
 async def paraechar(ctx):
     embed = discord.Embed(title="Para echar", description="Los conchesumare que deben morir", color=COLOR_ROJO)
     minions = session.query(Minion).filter(Minion.strikes > 1).all()
@@ -142,7 +141,7 @@ async def paraechar(ctx):
 
 
 @commands.has_any_role('GORDO BONDIOLA', 'GORDEUS')
-@bot.command(name='modoviolento')
+@bot.command(name='modoviolento', help='solo admins. bsos.')
 async def modoviolento(ctx):
     content = ctx.message.content.split(" ")
     try:
@@ -158,7 +157,7 @@ async def modoviolento(ctx):
         await ctx.send(f"El **modo violento** esta: {MODO_VIOLENTO}")
 
 
-@bot.command(name='info')
+@bot.command(name='info', help='datos del bot')
 async def info(ctx):
     embed = discord.Embed(title="Info", description="Informacion del bot", color=BOT_COLOR)
     embed.add_field(name='Version', value=VERSION)

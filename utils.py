@@ -13,7 +13,17 @@ WELCOME_MESSAGES = ["DNI y papeles por favor. Puede pasar, comportese y no haga 
                     "El problema no es mirar la vidriera, sino cuando te entran ganas de tocar.",
                     "Entra papi, no muerdo... Al menos no tan fuerte...",
                     "Disculpame pibe, ahora no te puedo dar la bienvenida. Está jugando peñarol."]
-#TODO: Mudar esta shit a la base
+TILT_FRASES = ['ESTO ES UN GOBIERNO EFICIENTE, APRENDAN KUKAS',
+               'MOROCHA INFERNAL VOTANDO AL PRO', 'PUTITAS MACRISTAS',
+               'QUE BIEN, CADA DIA MAS LADRONES MUERTOS, ASI!! ARGENTINOS ARMEMONOS TODOS,,',
+               'ESTA PERFECTO... HAY QUE DARLES PLOMO A ESTOS NEGROS DE MIERDA',
+               'NO ME ANDA LA MÁQUINA, QUE LABURO DE MIERDA TENGO, TODO POR LOS KAKA DE MIERDA!! HIJOS DE PUTA',
+               'NO ME ARRANCA EL PALIO, KRETINA LA PUTA QUE TE PARIO, TODO ES TU CULPA.',
+               'HOY EN DÍA LOS PADRES YA NOSABEN CRIAR A SUS HIJOS, EN VEZ DE SALIR UN MACHO JEFE DE FAIMLIA SALE UN PIBE APUTAZADO #DECEPCIONADO',
+               'YO ESTOY CON EL CARNICERO, A DARLES HACHA A LOS HIJOS DE PUTA,,',
+               'YO SIGO DICIENDO QUE LA SELECCION NO ES LO QUE ERA, SON TODOS UNOS PECHOFRIOS HIJOS DE PUTA PIERDWN 3 FINALES AL HILO. ANDATE FRE$$I!!!!!',
+               'Ni del Bolso ni Tripero, yo soy PINCHA y CARBONERO']                    
+#TODO: Mudar esta shit a la base (o no, analizarlo)
 
 
 def ascii_logo():
