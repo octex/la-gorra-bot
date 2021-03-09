@@ -128,7 +128,7 @@ async def advertidos(ctx):
     embed = discord.Embed(title="Advertidos", description="Los ladris con solo una falta a la ley", color=COLOR_AMARILLO)
     minions = session.query(Minion).filter_by(strikes=1).all()
     for minion in minions:
-        embed.add_field(name=minion.username, value=minion.strikes, inline=False)
+        embed.add_field(name=minion.username, value=f"Strikes: {minion.strikes}", inline=False)
     await ctx.send(embed=embed)
 
 
@@ -137,7 +137,7 @@ async def paraechar(ctx):
     embed = discord.Embed(title="Para echar", description="Los conchesumare que deben morir", color=COLOR_ROJO)
     minions = session.query(Minion).filter(Minion.strikes > 1).all()
     for minion in minions:
-        embed.add_field(name=minion.username, value=minion.strikes, inline=False)
+        embed.add_field(name=minion.username, value=f"Strikes: {minion.strikes}", inline=False)
     await ctx.send(embed=embed)
 
 @commands.has_any_role('GORDO BONDIOLA', 'GORDEUS')
@@ -149,7 +149,7 @@ async def multar(ctx, user: discord.User):
 
 
 @commands.has_any_role('GORDO BONDIOLA', 'GORDEUS')
-@bot.command(name='modoviolento', help='solo admins. bsos.')
+@bot.command(name='modoviolento', help='solo admins. bsos. Pone un 1 para activarlo o un 0 para desactivarlo.')
 async def modoviolento(ctx):
     content = ctx.message.content.split(" ")
     try:
