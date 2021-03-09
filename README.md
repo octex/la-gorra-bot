@@ -4,11 +4,10 @@ Bot gorrudo para DS
 Requerimientos:
 ```
 Python 3.X
-Virtual enviroment
-Instalar requirements.txt en el ve
+Instalar los requerimientos de requirements.txt
 ```
 
-El bot arranca con: `python3.X bot.py`
+El bot arranca con: `python bot.py`
 
 Es necesario antes crear un archivo en el directorio raiz del proyecto con nombre `.env` con el siguiente contenido:
 ```
@@ -19,3 +18,6 @@ SQL_CONFIG_PATH=C:\Users\TU_USER\CARPETA_DEL_PROYECTO\la-gorra-bot\resources/con
 SQL_CONFIG_PATH=./resources/config.sql # Linux
 ```
 Las variables que incluyen directorios varian dependiendo donde se levante el bot
+La configuracion de base de datos varia segun el motor utilizado, en este caso dejo de ejemplo con SQLite para poder levantarlo local sin problema.
+
+Esta incluido en el primer release el archivo de configuracion pertinente para levantar el bot desde Heroku. Sin embargo, para el correcto funcionamiento del bot, es necesario configurar una BD PostgreSQL de Heroku y modificar la variable `DB_PATH` (revisar documentacion de SQLAlchemy y Heroku para mas informacion)
