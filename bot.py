@@ -1,13 +1,14 @@
 import os
 import logging
-from random import randint, choice
+from random import randint, choice, uniform
 import discord
+from discord.ext.commands.errors import MissingRequiredArgument
 from discord.ext import commands
 from dotenv import load_dotenv
 from models import Minion, BotConfig
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import *
-from utils import ascii_logo, load_config_table, registro_civil, VERSION, WELCOME_MESSAGES, TILT_FRASES
+from utils import ascii_logo, load_config_table, registro_civil, VERSION, WELCOME_MESSAGES, TILT_FRASES, TILT_PROBABILITY
 
 
 # Inicializacion
@@ -66,10 +67,9 @@ async def on_message(message):
     if MODO_VIOLENTO:
         if message.author == bot.user:
             return
-        num = randint(1, 1000)
-        if num > 750:
+        num = uniform(0, 1)
+        if num < TILT_PROBABILITY:
             await message_channel.send(f"{choice(TILT_FRASES)}")
-    #TODO: Refinar esta logica
 
     if author_last_role not in IMPUNES:
         if (message_content.startswith('-p') or message_content.startswith('>p')) and \
@@ -140,6 +140,13 @@ async def paraechar(ctx):
         embed.add_field(name=minion.username, value=minion.strikes, inline=False)
     await ctx.send(embed=embed)
 
+@commands.has_any_role('GORDO BONDIOLA', 'GORDEUS')
+@bot.command(name='multar', help='para desconocer a algun pelotudo')
+async def multar(ctx, user: discord.User):
+    await registro_civil(author=user, author_name=str(user).split('#')[0], author_mention=user.mention,
+                                message_channel=ctx.channel, session=session)
+    await ctx.send(f"{user.mention} A la lista, pete.")
+
 
 @commands.has_any_role('GORDO BONDIOLA', 'GORDEUS')
 @bot.command(name='modoviolento', help='solo admins. bsos.')
@@ -172,7 +179,8 @@ async def info(ctx):
 
 @bot.event
 async def on_command_error(ctx, error):
-    response = f'Flasheaste rey :sunglasses: tira `{PREFIX}help` y anda memorizando. Gil.'
+    # response = f'Flasheaste rey :sunglasses: tira `{PREFIX}help` y anda memorizando. Gil.'
+    response = 'No sabes invocar un comando capo?'
     logging.error(f"COMMAND ERROR - error: {error}")
     await ctx.send(response)
 

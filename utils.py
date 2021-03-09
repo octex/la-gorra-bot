@@ -22,7 +22,9 @@ TILT_FRASES = ['ESTO ES UN GOBIERNO EFICIENTE, APRENDAN KUKAS',
                'HOY EN DÍA LOS PADRES YA NOSABEN CRIAR A SUS HIJOS, EN VEZ DE SALIR UN MACHO JEFE DE FAIMLIA SALE UN PIBE APUTAZADO #DECEPCIONADO',
                'YO ESTOY CON EL CARNICERO, A DARLES HACHA A LOS HIJOS DE PUTA,,',
                'YO SIGO DICIENDO QUE LA SELECCION NO ES LO QUE ERA, SON TODOS UNOS PECHOFRIOS HIJOS DE PUTA PIERDWN 3 FINALES AL HILO. ANDATE FRE$$I!!!!!',
-               'Ni del Bolso ni Tripero, yo soy PINCHA y CARBONERO']                    
+               'Ni del Bolso ni Tripero, yo soy PINCHA y CARBONERO',
+               'Que ganas de unas nenas...']
+TILT_PROBABILITY = 0.10
 #TODO: Mudar esta shit a la base (o no, analizarlo)
 
 
