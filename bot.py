@@ -69,6 +69,7 @@ async def on_message(message):
         num = randint(1, 1000)
         if num > 750:
             await message_channel.send(f"{choice(TILT_FRASES)}")
+    #TODO: Refinar esta logica
 
     if author_last_role not in IMPUNES:
         if (message_content.startswith('-p') or message_content.startswith('>p')) and \
