@@ -34,6 +34,7 @@ TILT_FRASES = ['ESTO ES UN GOBIERNO EFICIENTE, APRENDAN KUKAS',
                'CON ORGUYO PAGO MAS,,.',
                'QUE BUENO ESCUCHAR ANTONIO RIOS MI MUJER ME SECA LOS HUEVOS TODA LA MAÑANAJAJA KRETINA ESTO ES TU CLUPA',
                'YA SOLO FALTA UNA SEMANITA PARA QUE JUEGE EL AURINEGRO,VAMOS CARAJO !!!!']
+IMPUNES = ['GORDO MAESTRO', 'GORDO BONDIOLA', 'GORDEUS']
 TILT_PROBABILITY = 0.10
 #TODO: Mudar esta shit a la base (o no, analizarlo)
 
@@ -46,6 +47,13 @@ def ascii_logo():
     print("/_____/_/  |_|      \____/  \____/ /_/ |_| /_/ |_| /_/  |_|")
     print(f"                                        Version: {VERSION}")
     print("                                      © Gordos Loleros inc.")
+
+
+def inmunidad_diplomatica(user_roles):
+    for role in user_roles:
+        if str(role) in IMPUNES:
+            return True
+    return False
 
 
 def load_config_table(config, engine):

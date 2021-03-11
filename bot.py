@@ -9,7 +9,8 @@ from models import Minion, BotConfig
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import *
 from utils import ascii_logo, load_config_table, \
-registro_civil, VERSION, WELCOME_MESSAGES, TILT_FRASES, TILT_PROBABILITY, TILT_CHANNELS
+registro_civil, VERSION, WELCOME_MESSAGES, TILT_FRASES, \
+TILT_PROBABILITY, TILT_CHANNELS, inmunidad_diplomatica
 
 
 # Inicializacion
@@ -35,11 +36,10 @@ GORDO_BONDIOLA = session.query(BotConfig).filter_by(keyConfig='mod_role_mention'
 REGLAS_CHANNEL = session.query(BotConfig).filter_by(keyConfig='rules_channel').first().value
 WELCOME_CHANNEL = session.query(BotConfig).filter_by(keyConfig='welcome_channel_id').first().value
 MODO_VIOLENTO = bool(int(session.query(BotConfig).filter_by(keyConfig='tilt_mode').first().value))
-IMPUNES = ['GORDO MAESTRO', 'GORDO BONDIOLA', 'GORDEUS']
 BOT_COLOR = discord.Color.dark_purple()
 COLOR_AMARILLO = discord.Color.from_rgb(255, 233, 0)
 COLOR_ROJO = discord.Color.red()
-# MODO_VIOLENTO = False
+
 
 # Creamos la instancia del bot
 intents = discord.Intents.default()
@@ -60,7 +60,6 @@ async def on_message(message):
     author = message.author
     author_mention = author.mention
     author_roles = author.roles
-    author_last_role = author_roles[-1]
     message_channel_name = str(message.channel)
     message_channel = message.channel
     message_content = message.content
@@ -71,8 +70,10 @@ async def on_message(message):
         num = uniform(0, 1)
         if num < TILT_PROBABILITY:
             await message_channel.send(f"{choice(TILT_FRASES)}")
+    
+    es_impune = inmunidad_diplomatica(author_roles)
 
-    if author_last_role not in IMPUNES:
+    if not es_impune:
         if (message_content.startswith('-p') or message_content.startswith('>p')) and \
         message_channel_name != 'musica' or message_content.startswith('-skip') or message_content.startswith('>skip'):
             await message_channel.send(f'{GORDO_BONDIOLA} Chst! Aca hay un ladri que se esta ganando una bala.')
@@ -175,7 +176,6 @@ async def info(ctx):
 
 @bot.event
 async def on_command_error(ctx, error):
-    # response = f'Flasheaste rey :sunglasses: tira `{PREFIX}help` y anda memorizando. Gil.'
     response = 'No sabes invocar un comando capo?'
     logging.error(f"COMMAND ERROR - error: {error}")
     await ctx.send(response)
