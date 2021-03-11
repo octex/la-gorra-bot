@@ -6,7 +6,7 @@ from sqlalchemy import Sequence
 
 load_dotenv()
 
-Column(Integer, Sequence('id'), primary_key=True)
+Column(String(), Sequence('full_username'), primary_key=True)
 Base = declarative_base()
 Table = Table()
 DB_PATH = os.getenv('DB_PATH')
@@ -16,12 +16,9 @@ engine = create_engine(DB_PATH, echo=True)
 class Minion(Base):
     __tablename__ = "minions"
 
-    id = Column(Integer(), Sequence('id'), primary_key=True)
-    username = Column(String())
-    full_username = Column(String())
+    full_username = Column(String(), primary_key=True)
     mention_in_server = Column(String())
     strikes = Column(Integer())
-
     # required in order to access columns with server defaults
     # or SQL expression defaults, subsequent to a flush, without
     # triggering an expired load
