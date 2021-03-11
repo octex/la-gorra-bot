@@ -156,9 +156,15 @@ async def modoviolento(ctx, val: int):
     except ValueError:
         await ctx.send("Mandaste cualquiera forro. Es 0 o 1 la opcion.")
 
-@bot.command(name='modoviolento?', help='comando informativo')
-async def modoviolento_status(ctx):
-    await ctx.send(f"El **modo violento** esta en: {MODO_VIOLENTO}")
+@modoviolento.error
+async def modoviolento_error(ctx, error):
+    #TODO: Tiene que ejecutarse SOLO esta excepcion
+    if isinstance(error, MissingRequiredArgument):
+        await ctx.send(f"El **modo violento** esta en: {MODO_VIOLENTO}")
+
+# @bot.command(name='modoviolento?', help='comando informativo')
+# async def modoviolento_status(ctx):
+#     await ctx.send(f"El **modo violento** esta en: {MODO_VIOLENTO}")
 
 
 @bot.command(name='info', help='datos del bot')
