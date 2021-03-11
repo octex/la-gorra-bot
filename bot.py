@@ -59,7 +59,6 @@ async def on_message(message):
         return
     author = message.author
     author_mention = author.mention
-    author_roles = author.roles
     message_channel_name = str(message.channel)
     message_channel = message.channel
     message_content = message.content
@@ -71,7 +70,7 @@ async def on_message(message):
         if num < TILT_PROBABILITY:
             await message_channel.send(f"{choice(TILT_FRASES)}")
     
-    es_impune = inmunidad_diplomatica(author_roles)
+    es_impune = inmunidad_diplomatica(author.roles)
 
     if not es_impune:
         if (message_content.startswith('-p') or message_content.startswith('>p')) and \
