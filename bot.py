@@ -2,7 +2,7 @@ import os
 import logging
 from random import choice, uniform
 import discord
-from discord.ext.commands.errors import MissingRequiredArgument
+from discord.ext.commands.errors import MissingRequiredArgument, CommandNotFound
 from discord.ext import commands
 from dotenv import load_dotenv
 from models import Minion, BotConfig
@@ -158,13 +158,8 @@ async def modoviolento(ctx, val: int):
 
 @modoviolento.error
 async def modoviolento_error(ctx, error):
-    #TODO: Tiene que ejecutarse SOLO esta excepcion
     if isinstance(error, MissingRequiredArgument):
         await ctx.send(f"El **modo violento** esta en: {MODO_VIOLENTO}")
-
-# @bot.command(name='modoviolento?', help='comando informativo')
-# async def modoviolento_status(ctx):
-#     await ctx.send(f"El **modo violento** esta en: {MODO_VIOLENTO}")
 
 
 @bot.command(name='info', help='datos del bot')
@@ -181,9 +176,10 @@ async def info(ctx):
 
 @bot.event
 async def on_command_error(ctx, error):
-    response = 'No sabes invocar un comando capo?'
     logging.error(f"COMMAND ERROR - error: {error}")
-    await ctx.send(response)
+    if isinstance(error, CommandNotFound):
+        response = 'No sabes invocar un comando capo?'
+        await ctx.send(response)
 
 
 if __name__ == "__main__":
