@@ -140,6 +140,7 @@ async def paraechar(ctx):
         embed.add_field(name=minion.full_username, value=f"Strikes: {minion.strikes}", inline=False)
     await ctx.send(embed=embed)
 
+
 @commands.has_any_role('GORDO BONDIOLA', 'GORDEUS')
 @bot.command(name='multar', help='para desconocer a algun pelotudo')
 async def multar(ctx, user: discord.User):
@@ -151,6 +152,7 @@ async def multar(ctx, user: discord.User):
 async def multar_error_handler(ctx, error):
     if isinstance(error, MissingRequiredArgument):
         await ctx.send(f"Pone a quien queres multar, salame.")
+
 
 @commands.has_any_role('GORDO BONDIOLA', 'GORDEUS')
 @bot.command(name='modoviolento', help='solo admins. bsos. Pone un 1 para activarlo o un 0 para desactivarlo.')
@@ -166,6 +168,7 @@ async def modoviolento(ctx, val: int):
         await ctx.send(f"Cambiado **modo violento** a: {MODO_VIOLENTO}")
     except ValueError:
         await ctx.send("Mandaste cualquiera forro. Es 0 o 1 la opcion.")
+
 
 @modoviolento.error
 async def modoviolento_error_handler(ctx, error):
