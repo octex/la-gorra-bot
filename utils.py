@@ -13,6 +13,7 @@ WELCOME_MESSAGES = ["DNI y papeles por favor. Puede pasar, comportese y no haga 
                     "El problema no es mirar la vidriera, sino cuando te entran ganas de tocar.",
                     "Entra papi, no muerdo... Al menos no tan fuerte...",
                     "Disculpame pibe, ahora no te puedo dar la bienvenida. Está jugando peñarol."]
+TILT_CHANNELS = ['charla-general', 'gordos-reales', 'moli-posting']
 TILT_FRASES = ['ESTO ES UN GOBIERNO EFICIENTE, APRENDAN KUKAS',
                'MOROCHA INFERNAL VOTANDO AL PRO', 'PUTITAS MACRISTAS',
                'QUE BIEN, CADA DIA MAS LADRONES MUERTOS, ASI!! ARGENTINOS ARMEMONOS TODOS,,',
@@ -23,7 +24,17 @@ TILT_FRASES = ['ESTO ES UN GOBIERNO EFICIENTE, APRENDAN KUKAS',
                'YO ESTOY CON EL CARNICERO, A DARLES HACHA A LOS HIJOS DE PUTA,,',
                'YO SIGO DICIENDO QUE LA SELECCION NO ES LO QUE ERA, SON TODOS UNOS PECHOFRIOS HIJOS DE PUTA PIERDWN 3 FINALES AL HILO. ANDATE FRE$$I!!!!!',
                'Ni del Bolso ni Tripero, yo soy PINCHA y CARBONERO',
-               'Que ganas de unas nenas...']
+               'Que ganas de unas nenas...',
+               'un buen culito y una cerveza y yo estoy contento!! Jeje...',
+               'pero la pucha que este wanchope no pueda romperle el arco sera de dios!',
+               '@CFK podríamos ser vos y yo mamita.estas candente',
+               'ES INCREIBLE LA INSEGURIDAD QUE DEJARON ESTOS K DANDOLE GUITA A LOS VILLEROS Y NAIDE LOS METE EN CANA !!!',
+               'FRESSI LA CONCHS DE TU MADRE CAMINAS LA CANCHA VENDIDO !!! EUROPEISADO ENCIMA,,,',
+               'MAS PRO GRESO Y MENOS PLANES!!',
+               'CON ORGUYO PAGO MAS,,.',
+               'QUE BUENO ESCUCHAR ANTONIO RIOS MI MUJER ME SECA LOS HUEVOS TODA LA MAÑANAJAJA KRETINA ESTO ES TU CLUPA',
+               'YA SOLO FALTA UNA SEMANITA PARA QUE JUEGE EL AURINEGRO,VAMOS CARAJO !!!!']
+IMPUNES = ['GORDO MAESTRO', 'GORDO BONDIOLA', 'GORDEUS']
 TILT_PROBABILITY = 0.10
 #TODO: Mudar esta shit a la base (o no, analizarlo)
 
@@ -38,6 +49,13 @@ def ascii_logo():
     print("                                      © Gordos Loleros inc.")
 
 
+def inmunidad_diplomatica(user_roles):
+    for role in user_roles:
+        if str(role) in IMPUNES:
+            return True
+    return False
+
+
 def load_config_table(config, engine):
     statements = config.read().split('\n')
     for statement in statements:
@@ -47,15 +65,15 @@ def load_config_table(config, engine):
             print("Key already on DB")
 
 
-async def registro_civil(session, author, author_name, author_mention, message_channel):
-    minion_q = session.query(Minion).filter_by(username=author_name).first()
+async def registro_civil(session, author, author_mention, message_channel):
+    minion_q = session.query(Minion).filter_by(full_username=str(author)).first()
     if minion_q:
         minion_q.strikes = minion_q.strikes + 1
         session.add(minion_q)
         session.commit()
         await message_channel.send(f'{author_mention} Guarda amigo que vas por {minion_q.strikes} strikes')
     else:
-        minion_n = Minion(username=str(author_name), full_username=str(author), mention_in_server=str(author_mention), strikes=1)
+        minion_n = Minion(full_username=str(author), mention_in_server=str(author_mention), strikes=1)
         session.add(minion_n)
         session.commit()
         await message_channel.send(f'{author_mention} Primer strike, tene cuidado...')

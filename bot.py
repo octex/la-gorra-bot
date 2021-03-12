@@ -1,14 +1,16 @@
 import os
 import logging
-from random import randint, choice, uniform
+from random import choice, randint, uniform
 import discord
-from discord.ext.commands.errors import MissingRequiredArgument
+from discord.ext.commands.errors import MissingRequiredArgument, CommandNotFound
 from discord.ext import commands
 from dotenv import load_dotenv
 from models import Minion, BotConfig
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import *
-from utils import ascii_logo, load_config_table, registro_civil, VERSION, WELCOME_MESSAGES, TILT_FRASES, TILT_PROBABILITY
+from utils import ascii_logo, load_config_table, \
+registro_civil, VERSION, WELCOME_MESSAGES, TILT_FRASES, \
+TILT_PROBABILITY, TILT_CHANNELS, inmunidad_diplomatica
 
 
 # Inicializacion
@@ -33,11 +35,11 @@ GORDEUS = session.query(BotConfig).filter_by(keyConfig='admin_role_mention').fir
 GORDO_BONDIOLA = session.query(BotConfig).filter_by(keyConfig='mod_role_mention').first().value
 REGLAS_CHANNEL = session.query(BotConfig).filter_by(keyConfig='rules_channel').first().value
 WELCOME_CHANNEL = session.query(BotConfig).filter_by(keyConfig='welcome_channel_id').first().value
-IMPUNES = ['GORDO MAESTRO', 'GORDO BONDIOLA', 'GORDEUS']
+MODO_VIOLENTO = bool(int(session.query(BotConfig).filter_by(keyConfig='tilt_mode').first().value))
 BOT_COLOR = discord.Color.dark_purple()
 COLOR_AMARILLO = discord.Color.from_rgb(255, 233, 0)
 COLOR_ROJO = discord.Color.red()
-MODO_VIOLENTO = False
+
 
 # Creamos la instancia del bot
 intents = discord.Intents.default()
@@ -56,32 +58,29 @@ async def on_message(message):
     if message.author == bot.user:
         return
     author = message.author
-    author_name = str(author).split("#")[0]
     author_mention = author.mention
-    author_roles = author.roles
-    author_last_role = author_roles[-1]
     message_channel_name = str(message.channel)
     message_channel = message.channel
     message_content = message.content
     logging.info(f"DS MESSAGE - author: {author}    channel: {message_channel_name}     content: {message_content}")
-    if MODO_VIOLENTO:
+    if MODO_VIOLENTO and message_channel_name in TILT_CHANNELS:
         if message.author == bot.user:
             return
         num = uniform(0, 1)
         if num < TILT_PROBABILITY:
             await message_channel.send(f"{choice(TILT_FRASES)}")
+    
+    es_impune = inmunidad_diplomatica(author.roles)
 
-    if author_last_role not in IMPUNES:
+    if not es_impune:
         if (message_content.startswith('-p') or message_content.startswith('>p')) and \
         message_channel_name != 'musica' or message_content.startswith('-skip') or message_content.startswith('>skip'):
             await message_channel.send(f'{GORDO_BONDIOLA} Chst! Aca hay un ladri que se esta ganando una bala.')
-            await registro_civil(author=author, author_name=author_name, author_mention=author_mention,
-                                 message_channel=message_channel, session=session)
+            await registro_civil(author=author, author_mention=author_mention, message_channel=message_channel, session=session)
         elif message_content.startswith('$w') and \
             message_channel_name != 'waifus':
             await message_channel.send(f'{GORDO_BONDIOLA} Chst! Aca hay un ladri que se esta ganando una bala.')
-            await registro_civil(author=author, author_name=author_name, author_mention=author_mention,
-                                 message_channel=message_channel, session=session)
+            await registro_civil(author=author, author_mention=author_mention, message_channel=message_channel, session=session)
     if message_content.startswith('sale') or message_content.startswith('Sale'):
         await message_channel.send(f"Sale pa :sunglasses:")
     if bot.user.mentioned_in(message):
@@ -108,19 +107,20 @@ async def reglas(ctx):
 
 @commands.has_any_role('GORDO BONDIOLA', 'GORDEUS')
 @bot.command(name='indultar', help=f'Limpia los antecedentes del civil. Ejemplo: {PREFIX}indultar @usuario. Si el lokito no esta en el servidor, pasame el usuario con el tag SIN el arroba, ejemplo: {PREFIX}indultar molymolyProd#1234')
-async def indultar(ctx):
-    content = ctx.message.content.split(" ")
-    try:
-        user_to_pardon = content[1]
-        minion_to_pardon = session.query(Minion).filter_by(mention_in_server=user_to_pardon).first()
-        if minion_to_pardon is None:
-            await ctx.send('No lo registro a este che.')
-        else:
-            session.delete(minion_to_pardon)
-            session.commit()
-            await ctx.send(f'{user_to_pardon} tas indultado pa.')
-    except IndexError:
-        await ctx.send('Me falta el ladri a indultar')
+async def indultar(ctx, user: discord.User):
+    minion_to_pardon = session.query(Minion).filter_by(full_username=str(user)).first()
+    if minion_to_pardon is None:
+        await ctx.send('No lo registro a este che.')
+    else:
+        session.delete(minion_to_pardon)
+        session.commit()
+        await ctx.send(f'{user.mention} tas indultado pa.')
+
+
+@indultar.error
+async def indultar_error_handler(ctx, error):
+    if isinstance(error, MissingRequiredArgument):
+        await ctx.send(f"Pero sos pelotudo o te faltan teclas en el genius? Poneme a quien tengo que buscar.")
 
 
 @bot.command(name='advertidos', help='los que estan para kickear')
@@ -128,7 +128,7 @@ async def advertidos(ctx):
     embed = discord.Embed(title="Advertidos", description="Los ladris con solo una falta a la ley", color=COLOR_AMARILLO)
     minions = session.query(Minion).filter_by(strikes=1).all()
     for minion in minions:
-        embed.add_field(name=minion.username, value=f"Strikes: {minion.strikes}", inline=False)
+        embed.add_field(name=minion.full_username, value=f"Strikes: {minion.strikes}", inline=False)
     await ctx.send(embed=embed)
 
 
@@ -137,32 +137,55 @@ async def paraechar(ctx):
     embed = discord.Embed(title="Para echar", description="Los conchesumare que deben morir", color=COLOR_ROJO)
     minions = session.query(Minion).filter(Minion.strikes > 1).all()
     for minion in minions:
-        embed.add_field(name=minion.username, value=f"Strikes: {minion.strikes}", inline=False)
+        embed.add_field(name=minion.full_username, value=f"Strikes: {minion.strikes}", inline=False)
     await ctx.send(embed=embed)
+
 
 @commands.has_any_role('GORDO BONDIOLA', 'GORDEUS')
 @bot.command(name='multar', help='para desconocer a algun pelotudo')
 async def multar(ctx, user: discord.User):
-    await registro_civil(author=user, author_name=str(user).split('#')[0], author_mention=user.mention,
-                                message_channel=ctx.channel, session=session)
+    await registro_civil(author=user, author_mention=user.mention, message_channel=ctx.channel, session=session)
     await ctx.send(f"{user.mention} A la lista, pete.")
+
+
+@multar.error
+async def multar_error_handler(ctx, error):
+    if isinstance(error, MissingRequiredArgument):
+        await ctx.send(f"Pone a quien queres multar, salame.")
 
 
 @commands.has_any_role('GORDO BONDIOLA', 'GORDEUS')
 @bot.command(name='modoviolento', help='solo admins. bsos. Pone un 1 para activarlo o un 0 para desactivarlo.')
-async def modoviolento(ctx):
-    content = ctx.message.content.split(" ")
+async def modoviolento(ctx, val: int):
     try:
-        value = int(content[1])
-        if value < 0 or value > 1:
+        if val < 0 or val > 1:
             raise ValueError
         global MODO_VIOLENTO
-        MODO_VIOLENTO = bool(value)
+        tmp_config = session.query(BotConfig).filter_by(keyConfig='tilt_mode').first()
+        tmp_config.value = str(val)
+        session.commit()
+        MODO_VIOLENTO = bool(int(session.query(BotConfig).filter_by(keyConfig='tilt_mode').first().value))
         await ctx.send(f"Cambiado **modo violento** a: {MODO_VIOLENTO}")
     except ValueError:
         await ctx.send("Mandaste cualquiera forro. Es 0 o 1 la opcion.")
-    except IndexError:
-        await ctx.send(f"El **modo violento** esta: {MODO_VIOLENTO}")
+
+
+@modoviolento.error
+async def modoviolento_error_handler(ctx, error):
+    if isinstance(error, MissingRequiredArgument):
+        await ctx.send(f"El **modo violento** esta en: {MODO_VIOLENTO}")
+
+
+@bot.command(name='elchotode', help='Te tira la medida del pingo del miembro que pongas.')
+async def elchotode(ctx, user: discord.User):
+    pingo = randint(1, 35)
+    await ctx.send(f"{user.mention} Le mide: {pingo}cm")
+
+
+@elchotode.error
+async def elchotode_error_handler(ctx, error):
+    if isinstance(error, MissingRequiredArgument):
+        await ctx.send(f"Tengo la regla pero no el pingo maestro.")
 
 
 @bot.command(name='info', help='datos del bot')
@@ -179,10 +202,10 @@ async def info(ctx):
 
 @bot.event
 async def on_command_error(ctx, error):
-    # response = f'Flasheaste rey :sunglasses: tira `{PREFIX}help` y anda memorizando. Gil.'
-    response = 'No sabes invocar un comando capo?'
     logging.error(f"COMMAND ERROR - error: {error}")
-    await ctx.send(response)
+    if isinstance(error, CommandNotFound):
+        response = 'No sabes invocar un comando capo?'
+        await ctx.send(response)
 
 
 if __name__ == "__main__":
