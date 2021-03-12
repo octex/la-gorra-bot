@@ -25,8 +25,8 @@ class Minion(Base):
     __mapper_args__ = {"eager_defaults": True}
 
     def __repr__(self):
-        return "<Minion(id='%s', username='%s', full_username='%s', mention_in_server='%s', strikes='%s')>" % (
-                                self.id, self.username, self.full_username, self.mention_in_server, self.strikes)
+        return "<Minion(full_username='%s', mention_in_server='%s', strikes='%s')>" % (
+                                self.full_username, self.mention_in_server, self.strikes)
 
 class BotConfig(Base):
     __tablename__ = "botConfig"
