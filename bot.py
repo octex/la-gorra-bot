@@ -1,6 +1,6 @@
 import os
 import logging
-from random import choice, uniform
+from random import choice, randint, uniform
 import discord
 from discord.ext.commands.errors import MissingRequiredArgument, CommandNotFound
 from discord.ext import commands
@@ -174,6 +174,18 @@ async def modoviolento(ctx, val: int):
 async def modoviolento_error_handler(ctx, error):
     if isinstance(error, MissingRequiredArgument):
         await ctx.send(f"El **modo violento** esta en: {MODO_VIOLENTO}")
+
+
+@bot.command(name='elchotode', help='Te tira la medida del pingo del miembro que pongas.')
+async def elchotode(ctx, user: discord.User):
+    pingo = randint(1, 35)
+    await ctx.send(f"{user.mention} Le mide: {pingo}cm")
+
+
+@elchotode.error
+async def elchotode_error_handler(ctx, error):
+    if isinstance(error, MissingRequiredArgument):
+        await ctx.send(f"Tengo la regla pero no el pingo maestro.")
 
 
 @bot.command(name='info', help='datos del bot')
