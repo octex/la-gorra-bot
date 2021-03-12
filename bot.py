@@ -117,6 +117,12 @@ async def indultar(ctx, user: discord.User):
         await ctx.send(f'{user.mention} tas indultado pa.')
 
 
+@indultar.error
+async def indultar_error_handler(ctx, error):
+    if isinstance(error, MissingRequiredArgument):
+        await ctx.send(f"Pero sos pelotudo o te faltan teclas en el genius? Poneme a quien tengo que buscar.")
+
+
 @bot.command(name='advertidos', help='los que estan para kickear')
 async def advertidos(ctx):
     embed = discord.Embed(title="Advertidos", description="Los ladris con solo una falta a la ley", color=COLOR_AMARILLO)
@@ -141,6 +147,11 @@ async def multar(ctx, user: discord.User):
     await ctx.send(f"{user.mention} A la lista, pete.")
 
 
+@multar.error
+async def multar_error_handler(ctx, error):
+    if isinstance(error, MissingRequiredArgument):
+        await ctx.send(f"Pone a quien queres multar, salame.")
+
 @commands.has_any_role('GORDO BONDIOLA', 'GORDEUS')
 @bot.command(name='modoviolento', help='solo admins. bsos. Pone un 1 para activarlo o un 0 para desactivarlo.')
 async def modoviolento(ctx, val: int):
@@ -157,7 +168,7 @@ async def modoviolento(ctx, val: int):
         await ctx.send("Mandaste cualquiera forro. Es 0 o 1 la opcion.")
 
 @modoviolento.error
-async def modoviolento_error(ctx, error):
+async def modoviolento_error_handler(ctx, error):
     if isinstance(error, MissingRequiredArgument):
         await ctx.send(f"El **modo violento** esta en: {MODO_VIOLENTO}")
 
