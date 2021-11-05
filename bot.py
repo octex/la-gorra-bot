@@ -4,6 +4,7 @@ from random import choice, randint, uniform
 import discord
 from discord.ext.commands.errors import MissingRequiredArgument, CommandNotFound
 from discord.ext import commands
+from discord.message import Attachment
 from dotenv import load_dotenv
 from models import Minion, BotConfig
 from sqlalchemy.orm import sessionmaker
@@ -201,7 +202,12 @@ async def piky(ctx):
         Le agrego ademas, un @frasesmillonarias en la parte de abajo
         Si todo sale bien, subo la imagen editada como respuesta.
     """
-    return
+    text_message = ctx.message.content
+    text_message = text_message.replace(f'{PREFIX}piky', '')
+    img = ctx.message.attachments
+    if len(img) == 0 or text_message == '':
+        await ctx.send(f"Una imagen, y un texto. No es tan complicado simio.")
+    
 
 
 @bot.command(name='info', help='datos del bot')
