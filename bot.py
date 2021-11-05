@@ -232,6 +232,7 @@ async def piky(ctx):
                       font=text_font, stroke_fill=(0,0,0), stroke_width=2)
     img.save(tmp_file_dir)
     await ctx.send(file=discord.File(tmp_file_dir))
+    img.close()
     os.remove(tmp_file_dir)
     #TODO: Revisar como hacer para que no perdamos texto si sobrepasa la dimension de la imagen
 
