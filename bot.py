@@ -188,6 +188,22 @@ async def elchotode_error_handler(ctx, error):
         await ctx.send(f"Tengo la regla pero no el pingo maestro.")
 
 
+@bot.command(name='piky', help='Invocalo con una fotarda y una frase :sunglasses:')
+async def piky(ctx):
+    """
+        Primero valido que tenga imagen y texto (msg y attachment)
+            Si no es asi, no hago nada y devuelvo el error
+        Si cumplo eso, descargo la imagen ;OJO; Veamos si podemos procesarla sin
+        necesidad de descargarla
+            Me aseguro de que si algo sale mal, la imagen se elimine
+        Una vez que la proceso con PIL, le agrego el texto
+        cargado por mensaje en la parte centrica de la imagen
+        Le agrego ademas, un @frasesmillonarias en la parte de abajo
+        Si todo sale bien, subo la imagen editada como respuesta.
+    """
+    return
+
+
 @bot.command(name='info', help='datos del bot')
 async def info(ctx):
     embed = discord.Embed(title="Info", description="Informacion del bot", color=BOT_COLOR)
