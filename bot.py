@@ -1,10 +1,8 @@
-import os
-import logging
+import os, logging, requests, shutil, discord
+from PIL import Image, UnidentifiedImageError, ImageDraw, ImageFont
 from random import choice, randint, uniform
-import discord
 from discord.ext.commands.errors import MissingRequiredArgument, CommandNotFound
 from discord.ext import commands
-from discord.message import Attachment
 from dotenv import load_dotenv
 from models import Minion, BotConfig
 from sqlalchemy.orm import sessionmaker
@@ -28,7 +26,6 @@ load_config_table(config=config, engine=engine)
 Session = sessionmaker()
 Session.configure(bind=engine)
 session = Session()
-
 
 # Constantes
 PREFIX = session.query(BotConfig).filter_by(keyConfig='prefix').first().value
@@ -204,9 +201,40 @@ async def piky(ctx):
     """
     text_message = ctx.message.content
     text_message = text_message.replace(f'{PREFIX}piky', '')
-    img = ctx.message.attachments
-    if len(img) == 0 or text_message == '':
+    attachments_msg = ctx.message.attachments
+    if len(attachments_msg) == 0 or text_message == '':
         await ctx.send(f"Una imagen, y un texto. No es tan complicado simio.")
+
+    attachment_first = ctx.message.attachments[0]
+    attachment_url = attachment_first.url
+    attachment_filename = attachment_first.filename
+    tmp_file_dir = f"./{attachment_filename}"
+
+    response = requests.get(attachment_url, stream=True)
+
+    with open(tmp_file_dir, "wb") as tmp_file:
+        shutil.copyfileobj(response.raw, tmp_file)
+    img = Image.open(tmp_file_dir)
+    try:
+        img.verify() #TODO: Por que nos larga error?
+    except UnidentifiedImageError:
+        await ctx.send(f"Si me vas a tomar de boludo, hacela bien...")
+        os.remove(tmp_file_dir) #TODO: probar esto
+    except AttributeError:
+        pass
+    img.load()
+    img_size_px = img.size
+    text_font = ImageFont.truetype('resources/BebasNeue-Regular.ttf', int(img_size_px[0] / 10)) #TODO: Buscar una formula para esto
+    text_pos_px = (0, img_size_px[1] / 2) #TODO: Buscar una formula para esto
+    text_color = (255, 255, 255) # Blanco
+    img_modified = ImageDraw.Draw(img)
+    img_modified.text(text_pos_px, text_message, text_color, 
+                      font=text_font, stroke_fill=(0,0,0), stroke_width=2)
+    img.save(tmp_file_dir)
+    await ctx.send(file=discord.File(tmp_file_dir))
+    os.remove(tmp_file_dir)
+    #TODO: Revisar como hacer para que no perdamos texto si sobrepasa la dimension de la imagen
+
     
 
 
