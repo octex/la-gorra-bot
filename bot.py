@@ -1,7 +1,7 @@
-import os
-import logging
+import os, logging, requests, shutil, discord, textwrap
+from discord.errors import InvalidArgument, InvalidData
+from PIL import Image, UnidentifiedImageError, ImageDraw, ImageFont, ImageFilter
 from random import choice, randint, uniform
-import discord
 from discord.ext.commands.errors import MissingRequiredArgument, CommandNotFound
 from discord.ext import commands
 from dotenv import load_dotenv
@@ -10,7 +10,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy import *
 from utils import ascii_logo, load_config_table, \
 registro_civil, VERSION, WELCOME_MESSAGES, TILT_FRASES, \
-TILT_PROBABILITY, TILT_CHANNELS, inmunidad_diplomatica
+TILT_PROBABILITY, TILT_CHANNELS, inmunidad_diplomatica, pixels_to_points
 
 
 # Inicializacion
@@ -27,7 +27,6 @@ load_config_table(config=config, engine=engine)
 Session = sessionmaker()
 Session.configure(bind=engine)
 session = Session()
-
 
 # Constantes
 PREFIX = session.query(BotConfig).filter_by(keyConfig='prefix').first().value
@@ -186,6 +185,97 @@ async def elchotode(ctx, user: discord.User):
 async def elchotode_error_handler(ctx, error):
     if isinstance(error, MissingRequiredArgument):
         await ctx.send(f"Tengo la regla pero no el pingo maestro.")
+
+
+#TODO: Varias cosas. Primero ver que hacemos con el codigo comentado, me suena que esta
+# todo muy desprolijo. Segundo, Mejorar el tema de las formulas de tamaño
+# y los limites para poner texto. Por ultimo, revisar el manejo de excepciones, es un asco.
+@bot.command(name='piky', help='Invocalo con una foto y una frase de depredeador (ojo con el largo)')
+async def piky(ctx):
+    text_message = ctx.message.content
+    text_message = text_message.replace(f'{PREFIX}piky ', '')
+    text_message = text_message.replace(f'{PREFIX}piky', '')
+    attachments_msg = ctx.message.attachments
+
+    if len(attachments_msg) == 0 or text_message == '':
+        response = "Una imagen, y un texto. No es tan complicado capo."
+        await ctx.send(response)
+        return
+
+    attachment_first = ctx.message.attachments[0]
+    attachment_url = attachment_first.url
+    attachment_filename = attachment_first.filename
+    tmp_file_dir = f"./{attachment_filename}"
+
+    response = requests.get(attachment_url, stream=True)
+
+    with open(tmp_file_dir, "wb") as tmp_file:
+        shutil.copyfileobj(response.raw, tmp_file)
+    try:
+        img = Image.open(tmp_file_dir)
+    except UnidentifiedImageError as e:
+        os.remove(tmp_file_dir)
+        response = "Si me vas a tomar de boludo, hacela bien..."
+        await ctx.send(response)
+        return
+    except OSError as e:
+        os.remove(tmp_file_dir)
+        response = "Para emocion, hay quilombo en el barrio."
+        await ctx.send(response)
+        return
+    except Exception as e:
+        os.remove(tmp_file_dir)
+        raise e
+
+    img = img.filter(ImageFilter.SMOOTH_MORE)
+    img = img.filter(ImageFilter.EDGE_ENHANCE_MORE)
+    
+    img_size_px = img.size
+    img_size_px_x = img_size_px[0]
+    img_size_px_y = img_size_px[1]
+    text_font_size = pixels_to_points(img_size_px_x / 16)
+    text_font = ImageFont.truetype('resources/BebasNeue-Regular.ttf', text_font_size)
+    # text_pos_px = (int(img_size_px[0] / 14), img_size_px[1] / 2 + int(img_size_px[1] / 10))
+    # text_pos_px = (0,0)
+    text_color = (255, 255, 255)
+    mention_text_color = (255, 255, 0)
+    img_modified = ImageDraw.Draw(img)
+    w, h = img_modified.textsize(text_message)
+
+    phrases = textwrap.wrap(text_message, width=20)
+
+    mention_text = "@tubarão_milionário"
+    # Gracias: https://stackoverflow.com/questions/57796535/right-align-text-with-pil
+    w_m, h_m = text_font.getsize(mention_text)
+    img_modified.textsize(mention_text, font=text_font)
+    img_modified.textsize(text_message, font=text_font)
+    text_pos_px = ((img_size_px_x-w)/2 - img_size_px_x / 10,
+                    (img_size_px_y-h)/2 + img_size_px_y / 10)
+
+    # Source: https://stackoverflow.com/questions/1970807/center-middle-align-text-with-pil
+    current_h, pad = text_pos_px[1], 10
+    for line in phrases:
+        w, h = img_modified.textsize(line, font=text_font)
+        img_modified.text(((img_size_px_x - w) / 2, current_h), line, font=text_font,
+                            stroke_fill=(0,0,0), stroke_width=4, fill=text_color)
+        current_h += h + pad
+    
+    img_modified.text(((img_size_px_x - w_m) / 2, current_h), mention_text, font=text_font,
+                            stroke_fill=(0,0,0), stroke_width=4, fill=mention_text_color)
+
+    # img_modified.text((img_size_px_x - w_m, img_size_px_y - h_m), mention_text, font=text_font,
+                            # stroke_fill=(0,0,0), stroke_width=4, fill=mention_text_color)
+    img.save(tmp_file_dir)
+    img.close()
+    await ctx.send(file=discord.File(tmp_file_dir))
+    os.remove(tmp_file_dir)
+
+
+@piky.error
+async def piky_error_handler(ctx, error):
+    if isinstance(error, Exception):
+        response = f"Algo salio como el orto. Mandale esto a la administracion: `{error}`"
+        await ctx.send(response)
 
 
 @bot.command(name='info', help='datos del bot')

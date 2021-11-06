@@ -77,3 +77,7 @@ async def registro_civil(session, author, author_mention, message_channel):
         session.add(minion_n)
         session.commit()
         await message_channel.send(f'{author_mention} Primer strike, tene cuidado...')
+
+def pixels_to_points(pixels):
+    points = int(pixels * 0.75)
+    return points
